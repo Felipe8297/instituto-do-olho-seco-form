@@ -1,0 +1,15 @@
+# dependências
+/node_modules
+
+# build
+/.next
+/out
+
+# ambiente (segredos)
+.env
+.env.local
+.env*.local
+
+# sistema
+.DS_Store
+*.log

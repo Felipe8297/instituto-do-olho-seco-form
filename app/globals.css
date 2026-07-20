@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: radial-gradient(120% 80% at 50% -10%, #f4f9f8 0%, #edf3f2 55%, #e4eeec 100%);
+  color: #0c2a2e;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Kiosk: bloqueia seleção de texto e "callout" no toque */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+}
+
+/* Alvo de toque mínimo confortável para tablet */
+.touch-target {
+  min-height: 64px;
+}
+
+/* Foco visível para acessibilidade (teclado / leitor) */
+:focus-visible {
+  outline: 3px solid #0e9aa7;
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
