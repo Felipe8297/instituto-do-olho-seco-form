@@ -5,13 +5,11 @@ import {
   View,
   StyleSheet,
   Svg,
-  Rect,
+  Path,
   Circle,
-  Line,
   pdf,
 } from "@react-pdf/renderer";
-import { QUESTIONS, SCORE_MAX_ESCALA, BAND_TICKS, type ScoreBand } from "./form-config";
-import { questionPoints } from "./scoring";
+import { QUESTIONS, SCORE_MAX_ESCALA, type ScoreBand } from "./form-config";
 
 export interface ReportData {
   answers: Record<string, string[]>;
@@ -38,23 +36,21 @@ const s = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Helvetica-Bold",
     marginBottom: 8,
-    marginTop: 6,
     color: "#0B7A85",
   },
+  resultWrap: { flexDirection: "row", alignItems: "center", marginBottom: 22 },
+  scoreBig: { fontSize: 44, fontFamily: "Helvetica-Bold", color: "#0C2A2E" },
+  bandLabel: { fontSize: 20, fontFamily: "Helvetica-Bold" },
+  msg: { fontSize: 11, lineHeight: 1.5, marginTop: 8, color: "#0C2A2E" },
   row: {
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: "#E2EDEC",
     paddingVertical: 5,
   },
-  cQ: { width: "46%", paddingRight: 8 },
-  cA: { width: "44%", paddingRight: 8, color: "#0C2A2E" },
-  cP: { width: "10%", textAlign: "right", fontFamily: "Helvetica-Bold" },
+  cQ: { width: "52%", paddingRight: 8 },
+  cA: { width: "48%", paddingRight: 8, color: "#0C2A2E" },
   qText: { color: "#4A6467" },
-  resultWrap: { flexDirection: "row", marginTop: 8, alignItems: "center" },
-  bandLabel: { fontSize: 22, fontFamily: "Helvetica-Bold" },
-  scoreBig: { fontSize: 40, fontFamily: "Helvetica-Bold", color: "#0C2A2E" },
-  msg: { fontSize: 11, lineHeight: 1.5, marginTop: 8, color: "#0C2A2E" },
   footer: {
     position: "absolute",
     bottom: 24,
@@ -69,42 +65,45 @@ const s = StyleSheet.create({
   },
 });
 
-// Termômetro estático para o PDF.
-function PdfThermometer({ score, band }: { score: number; band: ScoreBand }) {
-  const TOP = 20;
-  const BOTTOM = 150;
-  const CX = 34;
-  const W = 22;
-  const frac = Math.max(0, Math.min(score / SCORE_MAX_ESCALA, 1));
-  const range = BOTTOM - TOP;
-  const fillH = frac * range;
-  const fillY = BOTTOM - fillH;
-  const tickY = (v: number) => BOTTOM - (v / SCORE_MAX_ESCALA) * range;
+// --- Gauge (arco semicircular) para o PDF, em 4 segmentos coloridos ----------
+const G_CX = 90;
+const G_CY = 92;
+const G_R = 72;
 
+function pointAt(t: number) {
+  const a = Math.PI * (1 - t);
+  return { x: G_CX + G_R * Math.cos(a), y: G_CY - G_R * Math.sin(a) };
+}
+function arc(t0: number, t1: number) {
+  const p0 = pointAt(t0);
+  const p1 = pointAt(t1);
+  return `M ${p0.x} ${p0.y} A ${G_R} ${G_R} 0 0 1 ${p1.x} ${p1.y}`;
+}
+
+const SEGMENTS = [
+  { d: arc(0, 0.25), color: "#22c55e" },
+  { d: arc(0.25, 0.5), color: "#eab308" },
+  { d: arc(0.5, 0.75), color: "#f97316" },
+  { d: arc(0.75, 1), color: "#ef4444" },
+];
+
+function PdfGauge({ score, band }: { score: number; band: ScoreBand }) {
+  const frac = Math.max(0, Math.min(score / SCORE_MAX_ESCALA, 1));
+  const knob = pointAt(frac);
   return (
-    <Svg width={110} height={220} viewBox="0 0 110 220">
-      <Rect x={CX - W / 2} y={TOP} width={W} height={BOTTOM - TOP + 4} rx={W / 2} fill="#E2EDEC" />
-      <Circle cx={CX} cy={BOTTOM + 22} r={20} fill="#E2EDEC" />
-      <Circle cx={CX} cy={BOTTOM + 22} r={15} fill={band.color} />
-      <Rect
-        x={CX - W / 2 + 4}
-        y={fillY}
-        width={W - 8}
-        height={fillH + 24}
-        rx={(W - 8) / 2}
-        fill={band.color}
-      />
-      {BAND_TICKS.map((v) => (
-        <Line
-          key={v}
-          x1={CX + W / 2 + 2}
-          y1={tickY(v)}
-          x2={CX + W / 2 + 12}
-          y2={tickY(v)}
-          strokeWidth={1.5}
-          stroke="#4A6467"
+    <Svg width={180} height={120} viewBox="0 0 180 120">
+      {SEGMENTS.map((seg, i) => (
+        <Path
+          key={i}
+          d={seg.d}
+          stroke={seg.color}
+          strokeWidth={16}
+          strokeLinecap="round"
+          fill="none"
         />
       ))}
+      <Circle cx={knob.x} cy={knob.y} r={10} fill="#FFFFFF" />
+      <Circle cx={knob.x} cy={knob.y} r={6} fill={band.color} />
     </Svg>
   );
 }
@@ -121,15 +120,28 @@ function ReportDoc({ answers, score, band, dateStr }: ReportData) {
           <Text style={s.date}>{dateStr}</Text>
         </View>
 
+        {/* Resultado primeiro */}
+        <Text style={s.sectionTitle}>Resultado</Text>
+        <View style={s.resultWrap}>
+          <PdfGauge score={score} band={band} />
+          <View style={{ marginLeft: 16, flex: 1 }}>
+            <Text style={s.scoreBig}>
+              {score}
+              <Text style={{ fontSize: 14, color: "#4A6467" }}> / {SCORE_MAX_ESCALA}</Text>
+            </Text>
+            <Text style={[s.bandLabel, { color: band.color }]}>{band.label}</Text>
+            <Text style={s.msg}>{band.msg}</Text>
+          </View>
+        </View>
+
+        {/* Respostas depois (sem coluna de pontos) */}
         <Text style={s.sectionTitle}>Respostas</Text>
         <View style={s.row}>
           <Text style={[s.cQ, { fontFamily: "Helvetica-Bold" }]}>Pergunta</Text>
           <Text style={[s.cA, { fontFamily: "Helvetica-Bold" }]}>Resposta(s)</Text>
-          <Text style={s.cP}>Pts</Text>
         </View>
         {QUESTIONS.map((q, i) => {
           const sel = answers[q.id] ?? [];
-          const pts = questionPoints(q.id, sel);
           return (
             <View key={q.id} style={s.row} wrap={false}>
               <Text style={s.cQ}>
@@ -137,20 +149,9 @@ function ReportDoc({ answers, score, band, dateStr }: ReportData) {
                 <Text style={s.qText}>{q.text}</Text>
               </Text>
               <Text style={s.cA}>{sel.length ? sel.join(", ") : "—"}</Text>
-              <Text style={s.cP}>{pts}</Text>
             </View>
           );
         })}
-
-        <Text style={[s.sectionTitle, { marginTop: 18 }]}>Resultado</Text>
-        <View style={s.resultWrap}>
-          <PdfThermometer score={score} band={band} />
-          <View style={{ marginLeft: 16, flex: 1 }}>
-            <Text style={s.scoreBig}>{score}</Text>
-            <Text style={[s.bandLabel, { color: band.color }]}>{band.label}</Text>
-            <Text style={s.msg}>{band.msg}</Text>
-          </View>
-        </View>
 
         <Text style={s.footer} fixed>
           Este relatório é uma triagem e não substitui avaliação médica.
@@ -169,6 +170,5 @@ export async function generatePdfBase64(data: ReportData): Promise<string> {
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
-  // remove "data:application/pdf;base64,"
   return dataUrl.split(",")[1] ?? "";
 }

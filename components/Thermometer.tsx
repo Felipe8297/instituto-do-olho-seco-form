@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BAND_TICKS, SCORE_MAX_ESCALA, type ScoreBand } from "@/lib/form-config";
+import { useEffect, useRef, useState } from "react";
+import { SCORE_MAX_ESCALA, type ScoreBand } from "@/lib/form-config";
 
 interface Props {
   score: number;
@@ -9,105 +9,136 @@ interface Props {
   max?: number;
 }
 
-// Geometria do tubo (coordenadas SVG).
-const TOP = 34;
-const BOTTOM = 300;
-const CX = 70;
-const TUBE_W = 40;
-const BULB_R = 34;
-const BULB_CY = BOTTOM + 40;
+// Geometria do arco (viewBox 360x250).
+const CX = 180;
+const CY = 190;
+const R = 150;
+const STROKE = 28;
+
+// Ponto sobre o arco para a fração t (0 = esquerda, 1 = direita, passando pelo topo).
+function pointAt(t: number) {
+  const a = (Math.PI * (1 - t)); // 180°..0°
+  return { x: CX + R * Math.cos(a), y: CY - R * Math.sin(a) };
+}
+
+const prefersReducedMotion =
+  typeof window !== "undefined" &&
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 export default function Thermometer({ score, band, max = SCORE_MAX_ESCALA }: Props) {
   const target = Math.max(0, Math.min(score / max, 1));
-  const [frac, setFrac] = useState(0);
+  const [t, setT] = useState(prefersReducedMotion ? target : 0);
+  const raf = useRef<number>();
 
-  // Anima o preenchimento de 0 → alvo ao montar.
+  // Tween do ponteiro 0 → alvo.
   useEffect(() => {
-    const t = requestAnimationFrame(() => setFrac(target));
-    return () => cancelAnimationFrame(t);
+    if (prefersReducedMotion) {
+      setT(target);
+      return;
+    }
+    const start = performance.now();
+    const dur = 950;
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
+      setT(target * eased);
+      if (p < 1) raf.current = requestAnimationFrame(tick);
+    };
+    raf.current = requestAnimationFrame(tick);
+    return () => {
+      if (raf.current) cancelAnimationFrame(raf.current);
+    };
   }, [target]);
 
-  const range = BOTTOM - TOP;
-  const fillH = frac * range;
-  const fillY = BOTTOM - fillH;
-
-  const tickY = (v: number) => BOTTOM - (v / max) * range;
+  const left = pointAt(0);
+  const right = pointAt(1);
+  const knob = pointAt(t);
+  const trackPath = `M ${left.x} ${left.y} A ${R} ${R} 0 0 1 ${right.x} ${right.y}`;
 
   return (
     <svg
-      viewBox="0 0 200 400"
+      viewBox="0 0 360 250"
       width="100%"
       height="100%"
       role="img"
-      aria-label={`Termômetro do resultado: score ${score}, faixa ${band.label}`}
+      aria-label={`Resultado: score ${score} de ${max}, faixa ${band.label}`}
     >
       <defs>
-        <linearGradient id="liquid" x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0%" stopColor={band.color} stopOpacity="0.85" />
-          <stop offset="100%" stopColor={band.color} stopOpacity="1" />
+        <linearGradient id="arcGrad" x1={left.x} y1="0" x2={right.x} y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#22c55e" />
+          <stop offset="42%" stopColor="#eab308" />
+          <stop offset="68%" stopColor="#f97316" />
+          <stop offset="100%" stopColor="#ef4444" />
         </linearGradient>
-        <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="4" result="b" />
-          <feMerge>
-            <feMergeNode in="b" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
+        <filter id="knobShadow" x="-60%" y="-60%" width="220%" height="220%">
+          <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#0C2A2E" floodOpacity="0.22" />
         </filter>
       </defs>
 
-      {/* Trilho (vidro) */}
-      <rect
-        x={CX - TUBE_W / 2}
-        y={TOP}
-        width={TUBE_W}
-        height={BOTTOM - TOP + 6}
-        rx={TUBE_W / 2}
-        fill="#E2EDEC"
+      {/* Trilho cinza de fundo */}
+      <path
+        d={trackPath}
+        fill="none"
+        stroke="#E7EEED"
+        strokeWidth={STROKE}
+        strokeLinecap="round"
       />
-      <circle cx={CX} cy={BULB_CY} r={BULB_R} fill="#E2EDEC" />
-
-      {/* Bulbo preenchido (sempre cheio) */}
-      <circle cx={CX} cy={BULB_CY} r={BULB_R - 6} fill="url(#liquid)" filter="url(#glow)" />
-
-      {/* Coluna de líquido */}
-      <clipPath id="tubeClip">
-        <rect
-          x={CX - TUBE_W / 2 + 6}
-          y={TOP}
-          width={TUBE_W - 12}
-          height={BOTTOM - TOP}
-          rx={(TUBE_W - 12) / 2}
-        />
-      </clipPath>
-      <rect
-        clipPath="url(#tubeClip)"
-        x={CX - TUBE_W / 2 + 6}
-        y={fillY}
-        width={TUBE_W - 12}
-        height={fillH + 40}
-        fill="url(#liquid)"
-        style={{ transition: "y 1.1s cubic-bezier(0.22,1,0.36,1), height 1.1s cubic-bezier(0.22,1,0.36,1)" }}
+      {/* Arco colorido */}
+      <path
+        d={trackPath}
+        fill="none"
+        stroke="url(#arcGrad)"
+        strokeWidth={STROKE}
+        strokeLinecap="round"
       />
 
-      {/* Marcadores das faixas (20 / 30 / 40) */}
-      {BAND_TICKS.map((v) => {
-        const y = tickY(v);
-        return (
-          <g key={v}>
-            <line
-              x1={CX + TUBE_W / 2 + 4}
-              y1={y}
-              x2={CX + TUBE_W / 2 + 20}
-              y2={y}
-              stroke="#4A6467"
-              strokeWidth={2}
-            />
-            <text x={CX + TUBE_W / 2 + 26} y={y + 5} fontSize={16} fill="#4A6467" fontWeight={600}>
-              {v}
-            </text>
-          </g>
-        );
-      })}
+      {/* Ponteiro (knob) */}
+      <circle cx={knob.x} cy={knob.y} r={17} fill="#FFFFFF" filter="url(#knobShadow)" />
+      <circle cx={knob.x} cy={knob.y} r={9} fill={band.color} />
+
+      {/* Texto central */}
+      <text
+        x={CX}
+        y={112}
+        textAnchor="middle"
+        fontSize={17}
+        letterSpacing="2"
+        fill="#4A6467"
+        style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+      >
+        SEU RESULTADO
+      </text>
+      <text
+        x={CX}
+        y={182}
+        textAnchor="middle"
+        fontSize={72}
+        fill="#0C2A2E"
+        style={{ fontFamily: "var(--font-display)", fontWeight: 800 }}
+      >
+        {score}
+      </text>
+      <text
+        x={CX}
+        y={210}
+        textAnchor="middle"
+        fontSize={18}
+        letterSpacing="1"
+        fill="#4A6467"
+        style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+      >
+        de {max}
+      </text>
+      <text
+        x={CX}
+        y={240}
+        textAnchor="middle"
+        fontSize={24}
+        fill={band.color}
+        style={{ fontFamily: "var(--font-display)", fontWeight: 800 }}
+      >
+        {band.label}
+      </text>
     </svg>
   );
 }
