@@ -45,7 +45,7 @@ export default function FormPage() {
               {q.section}
             </p>
           )}
-          <h2 className="mb-7 font-display text-2xl font-normal leading-snug text-navy sm:text-3xl">
+          <h2 className="mb-7 font-sans text-2xl font-semibold leading-snug text-navy sm:text-3xl">
             {q.text}
           </h2>
 
