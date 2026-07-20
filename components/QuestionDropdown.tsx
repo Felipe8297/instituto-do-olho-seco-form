@@ -13,7 +13,7 @@ interface Props {
 export default function QuestionDropdown({ question, selected, onToggle }: Props) {
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="mb-1 text-base font-medium text-mute">Pode marcar mais de uma opção.</p>
+      <p className="mb-1 text-base font-normal text-mute">Pode marcar mais de uma opção.</p>
       {question.options.map((opt) => {
         const active = selected.includes(opt.label);
         return (
@@ -23,15 +23,15 @@ export default function QuestionDropdown({ question, selected, onToggle }: Props
             role="checkbox"
             aria-checked={active}
             onClick={() => onToggle(opt.label)}
-            className={`touch-target flex items-center gap-4 rounded-2xl border-2 px-5 text-left text-lg font-semibold transition-all ${
+            className={`touch-target flex items-center gap-4 rounded-lg border-2 px-5 text-left text-lg font-medium transition-all ${
               active
-                ? "border-aqua bg-aqua/10 text-ink"
-                : "border-mist bg-card text-ink hover:border-aqua/50"
+                ? "border-amber bg-amber/12 text-navy"
+                : "border-line bg-card text-navy hover:border-amber"
             }`}
           >
             <span
-              className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border-2 transition-colors ${
-                active ? "border-aqua bg-aqua text-white" : "border-mist bg-white"
+              className={`grid h-8 w-8 shrink-0 place-items-center rounded-md border-2 transition-colors ${
+                active ? "border-amber bg-amber text-navy-deep" : "border-line bg-white"
               }`}
             >
               {active && (

@@ -71,7 +71,7 @@ export default function Thermometer({ score, band, max = SCORE_MAX_ESCALA }: Pro
           <stop offset="100%" stopColor="#ef4444" />
         </linearGradient>
         <filter id="knobShadow" x="-60%" y="-60%" width="220%" height="220%">
-          <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#0C2A2E" floodOpacity="0.22" />
+          <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#192938" floodOpacity="0.22" />
         </filter>
       </defs>
 
@@ -79,7 +79,7 @@ export default function Thermometer({ score, band, max = SCORE_MAX_ESCALA }: Pro
       <path
         d={trackPath}
         fill="none"
-        stroke="#E7EEED"
+        stroke="#e6eaf1"
         strokeWidth={STROKE}
         strokeLinecap="round"
       />
@@ -99,12 +99,12 @@ export default function Thermometer({ score, band, max = SCORE_MAX_ESCALA }: Pro
       {/* Texto central */}
       <text
         x={CX}
-        y={112}
+        y={110}
         textAnchor="middle"
-        fontSize={17}
-        letterSpacing="2"
-        fill="#4A6467"
-        style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+        fontSize={15}
+        letterSpacing="2.5"
+        fill="#5a6478"
+        style={{ fontFamily: "var(--font-body)", fontWeight: 600 }}
       >
         SEU RESULTADO
       </text>
@@ -112,9 +112,9 @@ export default function Thermometer({ score, band, max = SCORE_MAX_ESCALA }: Pro
         x={CX}
         y={182}
         textAnchor="middle"
-        fontSize={72}
-        fill="#0C2A2E"
-        style={{ fontFamily: "var(--font-display)", fontWeight: 800 }}
+        fontSize={74}
+        fill="#192938"
+        style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
       >
         {score}
       </text>
@@ -124,8 +124,8 @@ export default function Thermometer({ score, band, max = SCORE_MAX_ESCALA }: Pro
         textAnchor="middle"
         fontSize={18}
         letterSpacing="1"
-        fill="#4A6467"
-        style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+        fill="#5a6478"
+        style={{ fontFamily: "var(--font-body)", fontWeight: 500 }}
       >
         de {max}
       </text>
@@ -133,9 +133,9 @@ export default function Thermometer({ score, band, max = SCORE_MAX_ESCALA }: Pro
         x={CX}
         y={240}
         textAnchor="middle"
-        fontSize={24}
+        fontSize={25}
         fill={band.color}
-        style={{ fontFamily: "var(--font-display)", fontWeight: 800 }}
+        style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
       >
         {band.label}
       </text>

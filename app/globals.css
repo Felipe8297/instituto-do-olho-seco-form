@@ -12,8 +12,8 @@ body {
 }
 
 body {
-  background: radial-gradient(120% 80% at 50% -10%, #f4f9f8 0%, #edf3f2 55%, #e4eeec 100%);
-  color: #0c2a2e;
+  background: #f7f8fa;
+  color: #1a1a2e;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   /* Kiosk: bloqueia seleção de texto e "callout" no toque */
@@ -30,7 +30,7 @@ body {
 
 /* Foco visível para acessibilidade (teclado / leitor) */
 :focus-visible {
-  outline: 3px solid #0e9aa7;
+  outline: 3px solid #C9A66B;
   outline-offset: 3px;
   border-radius: 10px;
 }

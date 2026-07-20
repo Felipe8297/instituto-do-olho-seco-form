@@ -3,6 +3,7 @@ import {
   Page,
   Text,
   View,
+  Image,
   StyleSheet,
   Svg,
   Path,
@@ -16,51 +17,64 @@ export interface ReportData {
   score: number;
   band: ScoreBand;
   dateStr: string;
+  logoSrc?: string;
 }
 
+const NAVY = "#192938";
+const NAVY_DEEP = "#111d27";
+const AMBER = "#C9A66B";
+const TEXT = "#1a1a2e";
+const MUTE = "#5a6478";
+const LINE = "#dde3ed";
+
 const s = StyleSheet.create({
-  page: { padding: 34, fontSize: 10, color: "#0C2A2E", fontFamily: "Helvetica" },
-  header: {
+  page: { fontSize: 10, color: TEXT, fontFamily: "Helvetica" },
+  headerBand: {
+    backgroundColor: NAVY,
+    paddingVertical: 18,
+    paddingHorizontal: 34,
+    borderBottomWidth: 3,
+    borderBottomColor: AMBER,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-end",
-    borderBottomWidth: 2,
-    borderBottomColor: "#0E9AA7",
-    paddingBottom: 10,
-    marginBottom: 16,
+    alignItems: "center",
   },
-  brand: { fontSize: 9, color: "#0B7A85", letterSpacing: 1, textTransform: "uppercase" },
-  title: { fontSize: 17, fontFamily: "Helvetica-Bold", marginTop: 2 },
-  date: { fontSize: 9, color: "#4A6467" },
-  sectionTitle: {
-    fontSize: 12,
+  logo: { height: 26, objectFit: "contain" },
+  headerRight: { alignItems: "flex-end" },
+  headerTitle: { color: "#ffffff", fontSize: 11, fontFamily: "Helvetica-Bold" },
+  headerDate: { color: "rgba(255,255,255,0.6)", fontSize: 8, marginTop: 2 },
+  body: { paddingHorizontal: 34, paddingTop: 20, paddingBottom: 40 },
+  eyebrow: {
+    fontSize: 9,
+    color: AMBER,
+    letterSpacing: 1.5,
+    textTransform: "uppercase",
     fontFamily: "Helvetica-Bold",
     marginBottom: 8,
-    color: "#0B7A85",
   },
-  resultWrap: { flexDirection: "row", alignItems: "center", marginBottom: 22 },
-  scoreBig: { fontSize: 44, fontFamily: "Helvetica-Bold", color: "#0C2A2E" },
+  resultWrap: { flexDirection: "row", alignItems: "center", marginBottom: 24 },
+  scoreBig: { fontSize: 44, fontFamily: "Helvetica-Bold", color: NAVY },
   bandLabel: { fontSize: 20, fontFamily: "Helvetica-Bold" },
-  msg: { fontSize: 11, lineHeight: 1.5, marginTop: 8, color: "#0C2A2E" },
+  msg: { fontSize: 11, lineHeight: 1.5, marginTop: 8, color: TEXT },
   row: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#E2EDEC",
+    borderBottomColor: LINE,
     paddingVertical: 5,
   },
   cQ: { width: "52%", paddingRight: 8 },
-  cA: { width: "48%", paddingRight: 8, color: "#0C2A2E" },
-  qText: { color: "#4A6467" },
+  cA: { width: "48%", paddingRight: 8, color: TEXT },
+  qText: { color: MUTE },
   footer: {
     position: "absolute",
-    bottom: 24,
+    bottom: 22,
     left: 34,
     right: 34,
     fontSize: 8,
-    color: "#4A6467",
+    color: MUTE,
     textAlign: "center",
     borderTopWidth: 1,
-    borderTopColor: "#E2EDEC",
+    borderTopColor: LINE,
     paddingTop: 8,
   },
 });
@@ -93,14 +107,7 @@ function PdfGauge({ score, band }: { score: number; band: ScoreBand }) {
   return (
     <Svg width={180} height={120} viewBox="0 0 180 120">
       {SEGMENTS.map((seg, i) => (
-        <Path
-          key={i}
-          d={seg.d}
-          stroke={seg.color}
-          strokeWidth={16}
-          strokeLinecap="round"
-          fill="none"
-        />
+        <Path key={i} d={seg.d} stroke={seg.color} strokeWidth={16} strokeLinecap="round" fill="none" />
       ))}
       <Circle cx={knob.x} cy={knob.y} r={10} fill="#FFFFFF" />
       <Circle cx={knob.x} cy={knob.y} r={6} fill={band.color} />
@@ -108,50 +115,59 @@ function PdfGauge({ score, band }: { score: number; band: ScoreBand }) {
   );
 }
 
-function ReportDoc({ answers, score, band, dateStr }: ReportData) {
+function ReportDoc({ answers, score, band, dateStr, logoSrc }: ReportData) {
   return (
     <Document>
       <Page size="A4" style={s.page}>
-        <View style={s.header}>
-          <View>
-            <Text style={s.brand}>Instituto do Olho Seco</Text>
-            <Text style={s.title}>Relatório de Triagem — Olho Seco</Text>
-          </View>
-          <Text style={s.date}>{dateStr}</Text>
-        </View>
-
-        {/* Resultado primeiro */}
-        <Text style={s.sectionTitle}>Resultado</Text>
-        <View style={s.resultWrap}>
-          <PdfGauge score={score} band={band} />
-          <View style={{ marginLeft: 16, flex: 1 }}>
-            <Text style={s.scoreBig}>
-              {score}
-              <Text style={{ fontSize: 14, color: "#4A6467" }}> / {SCORE_MAX_ESCALA}</Text>
+        {/* Cabeçalho navy com a logo */}
+        <View style={s.headerBand} fixed>
+          {logoSrc ? (
+            <Image src={logoSrc} style={s.logo} />
+          ) : (
+            <Text style={{ color: "#fff", fontFamily: "Helvetica-Bold", fontSize: 13 }}>
+              Instituto do Olho Seco
             </Text>
-            <Text style={[s.bandLabel, { color: band.color }]}>{band.label}</Text>
-            <Text style={s.msg}>{band.msg}</Text>
+          )}
+          <View style={s.headerRight}>
+            <Text style={s.headerTitle}>Relatório de Triagem — Olho Seco</Text>
+            <Text style={s.headerDate}>{dateStr}</Text>
           </View>
         </View>
 
-        {/* Respostas depois (sem coluna de pontos) */}
-        <Text style={s.sectionTitle}>Respostas</Text>
-        <View style={s.row}>
-          <Text style={[s.cQ, { fontFamily: "Helvetica-Bold" }]}>Pergunta</Text>
-          <Text style={[s.cA, { fontFamily: "Helvetica-Bold" }]}>Resposta(s)</Text>
-        </View>
-        {QUESTIONS.map((q, i) => {
-          const sel = answers[q.id] ?? [];
-          return (
-            <View key={q.id} style={s.row} wrap={false}>
-              <Text style={s.cQ}>
-                <Text style={{ color: "#0B7A85" }}>{i + 1}. </Text>
-                <Text style={s.qText}>{q.text}</Text>
+        <View style={s.body}>
+          {/* Resultado primeiro */}
+          <Text style={s.eyebrow}>Resultado</Text>
+          <View style={s.resultWrap}>
+            <PdfGauge score={score} band={band} />
+            <View style={{ marginLeft: 16, flex: 1 }}>
+              <Text style={s.scoreBig}>
+                {score}
+                <Text style={{ fontSize: 14, color: MUTE }}> / {SCORE_MAX_ESCALA}</Text>
               </Text>
-              <Text style={s.cA}>{sel.length ? sel.join(", ") : "—"}</Text>
+              <Text style={[s.bandLabel, { color: band.color }]}>{band.label}</Text>
+              <Text style={s.msg}>{band.msg}</Text>
             </View>
-          );
-        })}
+          </View>
+
+          {/* Respostas depois (sem coluna de pontos) */}
+          <Text style={s.eyebrow}>Respostas</Text>
+          <View style={s.row}>
+            <Text style={[s.cQ, { fontFamily: "Helvetica-Bold", color: NAVY }]}>Pergunta</Text>
+            <Text style={[s.cA, { fontFamily: "Helvetica-Bold", color: NAVY }]}>Resposta(s)</Text>
+          </View>
+          {QUESTIONS.map((q, i) => {
+            const sel = answers[q.id] ?? [];
+            return (
+              <View key={q.id} style={s.row} wrap={false}>
+                <Text style={s.cQ}>
+                  <Text style={{ color: AMBER, fontFamily: "Helvetica-Bold" }}>{i + 1}. </Text>
+                  <Text style={s.qText}>{q.text}</Text>
+                </Text>
+                <Text style={s.cA}>{sel.length ? sel.join(", ") : "—"}</Text>
+              </View>
+            );
+          })}
+        </View>
 
         <Text style={s.footer} fixed>
           Este relatório é uma triagem e não substitui avaliação médica.
@@ -163,7 +179,10 @@ function ReportDoc({ answers, score, band, dateStr }: ReportData) {
 
 /** Gera o PDF e devolve o conteúdo em base64 (sem o prefixo data:). */
 export async function generatePdfBase64(data: ReportData): Promise<string> {
-  const blob = await pdf(<ReportDoc {...data} />).toBlob();
+  const logoSrc =
+    data.logoSrc ??
+    (typeof window !== "undefined" ? `${window.location.origin}/logo.png` : undefined);
+  const blob = await pdf(<ReportDoc {...data} logoSrc={logoSrc} />).toBlob();
   const dataUrl: string = await new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => resolve(reader.result as string);

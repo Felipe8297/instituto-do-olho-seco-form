@@ -6,6 +6,7 @@ import { useFormStore } from "@/store/useFormStore";
 import { getBand } from "@/lib/scoring";
 import { KIOSK_RESET_SECONDS } from "@/lib/form-config";
 import Thermometer from "@/components/Thermometer";
+import BrandBar from "@/components/BrandBar";
 
 type SendState = "idle" | "sending" | "sent" | "error";
 
@@ -62,29 +63,32 @@ export default function ResultPage() {
   }, [router]);
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-2xl flex-col items-center justify-center px-6 py-10">
-      {/* Gauge de score (assinatura) */}
-      <div className="w-full max-w-[460px] animate-fadeUp">
-        <Thermometer score={score} band={band} />
-      </div>
+    <div className="flex min-h-dvh flex-col bg-off-white">
+      <BrandBar />
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center px-6 py-10">
+        {/* Gauge de score (assinatura) */}
+        <div className="w-full max-w-[460px] animate-fadeUp">
+          <Thermometer score={score} band={band} />
+        </div>
 
-      {/* Mensagem da faixa */}
-      <p className="mt-2 max-w-xl animate-fadeUp text-center text-lg leading-relaxed text-ink sm:text-xl">
-        {band.msg}
-      </p>
+        {/* Mensagem da faixa */}
+        <p className="mt-2 max-w-xl animate-fadeUp text-center text-lg font-light leading-relaxed text-ink sm:text-xl">
+          {band.msg}
+        </p>
 
-      <p className="mt-8 max-w-md animate-fadeUp text-center text-sm text-mute">
-        Esta triagem não substitui uma avaliação médica. Leve o resultado ao seu oftalmologista.
-      </p>
+        <p className="mt-8 max-w-md animate-fadeUp text-center text-sm font-light text-mute">
+          Esta triagem não substitui uma avaliação médica. Leve o resultado ao seu oftalmologista.
+        </p>
 
-      {/* Status discreto do envio */}
-      <div className="mt-6 h-5 text-center text-sm font-medium">
-        {send === "sending" && <span className="text-mute">Enviando resumo…</span>}
-        {send === "sent" && <span className="text-aqua-deep">✓ Resumo enviado</span>}
-        {send === "error" && (
-          <span className="text-mute">Resumo registrado. A recepção fará o envio, se necessário.</span>
-        )}
-      </div>
-    </main>
+        {/* Status discreto do envio */}
+        <div className="mt-6 h-5 text-center text-sm font-medium">
+          {send === "sending" && <span className="text-mute">Enviando resumo…</span>}
+          {send === "sent" && <span className="text-[#2d7a4f]">✓ Resumo enviado</span>}
+          {send === "error" && (
+            <span className="text-mute">Resumo registrado. A recepção fará o envio, se necessário.</span>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }

@@ -9,26 +9,29 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Tema "lágrima clínica" — frio, calmo, legível (foge do cream+terracota padrão)
-        ink: "#0C2A2E",       // texto principal / teal-ardósia profundo
-        mute: "#4A6467",      // texto secundário
-        bg: "#EDF3F2",        // fundo geral, off-white frio
-        card: "#FFFFFF",
-        aqua: "#0E9AA7",      // primário (água/lágrima)
-        "aqua-deep": "#0B7A85",
-        mist: "#CFE3E2",      // bordas suaves
-        "mist-2": "#E2EDEC",
+        // Identidade do Instituto do Olho Seco (navy + dourado)
+        navy: "#192938",
+        "navy-deep": "#111d27",
+        "navy-mid": "#1e3347",
+        amber: "#C9A66B",
+        "amber-light": "#e0c08e",
+        ink: "#1a1a2e", // texto principal
+        mute: "#5a6478", // texto secundário
+        line: "#dde3ed", // bordas
+        "off-white": "#f7f8fa",
+        card: "#ffffff",
       },
       fontFamily: {
-        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Georgia", "serif"],
         sans: ["var(--font-body)", "system-ui", "sans-serif"],
       },
       borderRadius: {
-        xl2: "1.5rem",
+        DEFAULT: "10px",
+        lg: "18px",
       },
       boxShadow: {
-        soft: "0 10px 40px -12px rgba(12, 42, 46, 0.18)",
-        card: "0 2px 12px -4px rgba(12, 42, 46, 0.12)",
+        soft: "0 4px 24px rgba(25,41,56,.10)",
+        lg: "0 12px 48px rgba(25,41,56,.16)",
       },
       keyframes: {
         fadeUp: {
@@ -37,7 +40,7 @@ const config: Config = {
         },
       },
       animation: {
-        fadeUp: "fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both",
+        fadeUp: "fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both",
       },
     },
   },

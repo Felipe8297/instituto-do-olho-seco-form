@@ -20,18 +20,18 @@ export default function QuestionButtons({ question, selected, onToggle }: Props)
             type="button"
             aria-pressed={active}
             onClick={() => onToggle(opt.label)}
-            className={`touch-target flex items-center gap-4 rounded-2xl border-2 px-6 text-left text-lg font-semibold transition-all sm:text-xl ${
+            className={`touch-target flex items-center gap-4 rounded-lg border-2 px-6 text-left text-lg font-medium transition-all sm:text-xl ${
               active
-                ? "border-aqua bg-aqua text-white shadow-soft"
-                : "border-mist bg-card text-ink hover:border-aqua/50"
+                ? "border-amber bg-amber text-navy-deep shadow-soft"
+                : "border-line bg-card text-navy hover:border-amber"
             }`}
           >
             <span
               className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 ${
-                active ? "border-white" : "border-mist"
+                active ? "border-navy-deep" : "border-line"
               }`}
             >
-              {active && <span className="h-3.5 w-3.5 rounded-full bg-white" />}
+              {active && <span className="h-3.5 w-3.5 rounded-full bg-navy-deep" />}
             </span>
             {opt.label}
           </button>
