@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useFormStore } from "@/store/useFormStore";
-import { getBand } from "@/lib/scoring";
-import { KIOSK_RESET_SECONDS } from "@/lib/form-config";
-import Thermometer from "@/components/Thermometer";
 import BrandBar from "@/components/BrandBar";
+import Thermometer from "@/components/Thermometer";
+import { KIOSK_RESET_SECONDS } from "@/lib/form-config";
+import { getBand } from "@/lib/scoring";
+import { useFormStore } from "@/store/useFormStore";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 type SendState = "idle" | "sending" | "sent" | "error";
 
@@ -75,11 +75,7 @@ export default function ResultPage() {
         <p className="mt-2 max-w-xl animate-fadeUp text-center text-lg font-light leading-relaxed text-ink sm:text-xl">
           {band.msg}
         </p>
-
-        <p className="mt-8 max-w-md animate-fadeUp text-center text-sm font-light text-mute">
-          Esta triagem não substitui uma avaliação médica. Leve o resultado ao seu oftalmologista.
-        </p>
-
+        
         {/* Status discreto do envio */}
         <div className="mt-6 h-5 text-center text-sm font-medium">
           {send === "sending" && <span className="text-mute">Enviando resumo…</span>}
