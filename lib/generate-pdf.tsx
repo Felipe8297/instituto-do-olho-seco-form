@@ -1,14 +1,14 @@
 import {
+  Circle,
   Document,
-  Page,
-  Text,
-  View,
   Image,
+  Page,
+  Path,
+  pdf,
   StyleSheet,
   Svg,
-  Path,
-  Circle,
-  pdf,
+  Text,
+  View,
 } from "@react-pdf/renderer";
 import { QUESTIONS, SCORE_MAX_ESCALA, type ScoreBand } from "./form-config";
 
@@ -17,6 +17,7 @@ export interface ReportData {
   score: number;
   band: ScoreBand;
   dateStr: string;
+  patient?: { nome: string; idade: string; telefone: string };
   logoSrc?: string;
 }
 
@@ -44,6 +45,18 @@ const s = StyleSheet.create({
   headerTitle: { color: "#ffffff", fontSize: 11, fontFamily: "Helvetica-Bold" },
   headerDate: { color: "rgba(255,255,255,0.6)", fontSize: 8, marginTop: 2 },
   body: { paddingHorizontal: 34, paddingTop: 20, paddingBottom: 40 },
+  patientBox: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 4,
+    backgroundColor: "#f7f8fa",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 22,
+  },
+  patientItem: { width: "50%", marginBottom: 4 },
+  patientLabel: { fontSize: 8, color: MUTE, textTransform: "uppercase", letterSpacing: 0.5 },
+  patientValue: { fontSize: 12, color: TEXT, fontFamily: "Helvetica-Bold" },
   eyebrow: {
     fontSize: 9,
     color: AMBER,
@@ -115,7 +128,7 @@ function PdfGauge({ score, band }: { score: number; band: ScoreBand }) {
   );
 }
 
-function ReportDoc({ answers, score, band, dateStr, logoSrc }: ReportData) {
+function ReportDoc({ answers, score, band, dateStr, patient, logoSrc }: ReportData) {
   return (
     <Document>
       <Page size="A4" style={s.page}>
@@ -135,7 +148,32 @@ function ReportDoc({ answers, score, band, dateStr, logoSrc }: ReportData) {
         </View>
 
         <View style={s.body}>
-          {/* Resultado primeiro */}
+          {/* Dados do paciente */}
+          {patient && (patient.nome || patient.idade || patient.telefone) ? (
+            <>
+              <Text style={s.eyebrow}>Paciente</Text>
+              <View style={s.patientBox}>
+                <View style={s.patientItem}>
+                  <Text style={s.patientLabel}>Nome</Text>
+                  <Text style={s.patientValue}>{patient.nome || "—"}</Text>
+                </View>
+                <View style={s.patientItem}>
+                  <Text style={s.patientLabel}>Idade</Text>
+                  <Text style={s.patientValue}>{patient.idade || "—"}</Text>
+                </View>
+                <View style={s.patientItem}>
+                  <Text style={s.patientLabel}>Telefone</Text>
+                  <Text style={s.patientValue}>{patient.telefone || "—"}</Text>
+                </View>
+                <View style={s.patientItem}>
+                  <Text style={s.patientLabel}>Data</Text>
+                  <Text style={s.patientValue}>{dateStr}</Text>
+                </View>
+              </View>
+            </>
+          ) : null}
+
+          {/* Resultado */}
           <Text style={s.eyebrow}>Resultado</Text>
           <View style={s.resultWrap}>
             <PdfGauge score={score} band={band} />
@@ -168,10 +206,6 @@ function ReportDoc({ answers, score, band, dateStr, logoSrc }: ReportData) {
             );
           })}
         </View>
-
-        <Text style={s.footer} fixed>
-          Este relatório é uma triagem e não substitui avaliação médica.
-        </Text>
       </Page>
     </Document>
   );

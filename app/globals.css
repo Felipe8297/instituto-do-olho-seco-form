@@ -28,6 +28,40 @@ body {
   min-height: 64px;
 }
 
+/* Campo de texto do formulário (tablet-friendly) */
+.input-triagem {
+  width: 100%;
+  min-height: 64px;
+  padding: 0 1rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #1a1a2e;
+  background: #ffffff;
+  border: 2px solid #dde3ed;
+  border-radius: 10px;
+  transition: border-color 0.15s ease;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.input-triagem::placeholder {
+  color: #9aa6b6;
+  font-weight: 400;
+}
+.input-triagem:focus {
+  border-color: #C9A66B;
+  outline: none;
+}
+/* remove as setinhas do input number */
+.input-triagem[type="number"]::-webkit-outer-spin-button,
+.input-triagem[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.input-triagem[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 /* Foco visível para acessibilidade (teclado / leitor) */
 :focus-visible {
   outline: 3px solid #C9A66B;

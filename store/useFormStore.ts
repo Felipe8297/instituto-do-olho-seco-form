@@ -2,13 +2,21 @@ import { create } from "zustand";
 import { QUESTIONS } from "@/lib/form-config";
 import { calcScore } from "@/lib/scoring";
 
+export interface Patient {
+  nome: string;
+  idade: string;
+  telefone: string;
+}
+
 interface FormState {
   answers: Record<string, string[]>;
   step: number; // índice da pergunta atual (0-based)
   consent: boolean;
   score: number;
+  patient: Patient;
 
   setConsent: (v: boolean) => void;
+  setPatient: (partial: Partial<Patient>) => void;
   setAnswer: (questionId: string, labels: string[]) => void;
   toggleOption: (questionId: string, label: string) => void;
   next: () => void;
@@ -18,14 +26,17 @@ interface FormState {
 }
 
 const OPT_NAO = "Não";
+const EMPTY_PATIENT: Patient = { nome: "", idade: "", telefone: "" };
 
 export const useFormStore = create<FormState>((set, get) => ({
   answers: {},
   step: 0,
   consent: false,
   score: 0,
+  patient: { ...EMPTY_PATIENT },
 
   setConsent: (v) => set({ consent: v }),
+  setPatient: (partial) => set((s) => ({ patient: { ...s.patient, ...partial } })),
 
   setAnswer: (questionId, labels) => {
     const answers = { ...get().answers, [questionId]: labels };
@@ -59,5 +70,5 @@ export const useFormStore = create<FormState>((set, get) => ({
   prev: () => set((s) => ({ step: Math.max(s.step - 1, 0) })),
   goTo: (step) => set({ step: Math.max(0, Math.min(step, QUESTIONS.length - 1)) }),
 
-  reset: () => set({ answers: {}, step: 0, consent: false, score: 0 }),
+  reset: () => set({ answers: {}, step: 0, consent: false, score: 0, patient: { ...EMPTY_PATIENT } }),
 }));

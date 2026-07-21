@@ -10,9 +10,20 @@ import { useEffect, useRef, useState } from "react";
 
 type SendState = "idle" | "sending" | "sent" | "error";
 
+// "José da Silva" -> "jose-da-silva" (para o nome do arquivo)
+function slugNome(nome: string): string {
+  const s = nome
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "") // remove acentos
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return s || "paciente";
+}
+
 export default function ResultPage() {
   const router = useRouter();
-  const { answers, score, consent } = useFormStore();
+  const { answers, score, consent, patient } = useFormStore();
   const band = getBand(score);
   const [send, setSend] = useState<SendState>("idle");
   const sentOnce = useRef(false);
@@ -33,8 +44,7 @@ export default function ResultPage() {
         const { generatePdfBase64 } = await import("@/lib/generate-pdf");
         const now = new Date();
         const dateStr = now.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
-        const pdfBase64 = await generatePdfBase64({ answers, score, band, dateStr });
-        const stamp = now.toISOString().slice(0, 16).replace(/[-:T]/g, "");
+        const pdfBase64 = await generatePdfBase64({ answers, score, band, dateStr, patient });
 
         const res = await fetch("/api/send-report", {
           method: "POST",
@@ -42,9 +52,10 @@ export default function ResultPage() {
           body: JSON.stringify({
             to: process.env.NEXT_PUBLIC_REPORT_EMAIL || undefined,
             pdfBase64,
-            filename: `triagem-olho-seco-${stamp}.pdf`,
+            filename: `triagem-olho-seco-${slugNome(patient.nome)}.pdf`,
             score,
             band: band.label,
+            patient,
           }),
         });
         if (!res.ok) throw new Error(await res.text());
@@ -54,7 +65,7 @@ export default function ResultPage() {
         setSend("error");
       }
     })();
-  }, [consent, answers, score, band]);
+  }, [consent, answers, score, band, patient]);
 
   // Timer oculto de reset (kiosk): volta para a Home após 30s.
   useEffect(() => {

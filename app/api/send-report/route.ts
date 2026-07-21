@@ -8,6 +8,16 @@ interface Body {
   filename: string;
   score: number;
   band: string;
+  patient?: { nome?: string; idade?: string; telefone?: string };
+}
+
+// Escapa texto do paciente antes de injetar no HTML do e-mail.
+function esc(v?: string) {
+  return (v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 export async function POST(req: Request) {
@@ -34,6 +44,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "PDF ausente." }, { status: 400 });
   }
 
+  const p = body.patient ?? {};
+  const nome = esc(p.nome).trim();
+  const subject = nome
+    ? `Triagem Olho Seco — ${nome} — Score ${body.score} (${body.band})`
+    : `Triagem Olho Seco — Score ${body.score} (${body.band})`;
+
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -43,10 +59,15 @@ export async function POST(req: Request) {
     body: JSON.stringify({
       from,
       to: [to],
-      subject: `Triagem Olho Seco — Score ${body.score} (${body.band})`,
+      subject,
       html: `<p>Relatório de triagem em anexo.</p>
-             <p>Score: <b>${body.score}</b> — faixa <b>${body.band}</b>.</p>
-             <p style="color:#4A6467;font-size:12px">Enviado automaticamente pelo formulário de triagem da recepção.</p>`,
+             <table style="border-collapse:collapse;font-size:14px;margin:8px 0">
+               <tr><td style="padding:2px 12px 2px 0;color:#5a6478">Paciente</td><td><b>${nome || "—"}</b></td></tr>
+               <tr><td style="padding:2px 12px 2px 0;color:#5a6478">Idade</td><td>${esc(p.idade) || "—"}</td></tr>
+               <tr><td style="padding:2px 12px 2px 0;color:#5a6478">Telefone</td><td>${esc(p.telefone) || "—"}</td></tr>
+               <tr><td style="padding:2px 12px 2px 0;color:#5a6478">Score</td><td><b>${body.score}</b> — faixa <b>${body.band}</b></td></tr>
+             </table>
+             <p style="color:#5a6478;font-size:12px">Enviado automaticamente pelo formulário de triagem da recepção.</p>`,
       attachments: [{ filename: body.filename, content: body.pdfBase64 }],
     }),
   });

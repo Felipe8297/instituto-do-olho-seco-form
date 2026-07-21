@@ -20,7 +20,7 @@ export default function Home() {
   function iniciar() {
     if (!agree) return;
     setConsent(true);
-    router.push("/form");
+    router.push("/dados");
   }
 
   return (

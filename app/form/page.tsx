@@ -12,12 +12,13 @@ import QuestionDropdown from "@/components/QuestionDropdown";
 
 export default function FormPage() {
   const router = useRouter();
-  const { step, answers, consent, toggleOption, next, prev } = useFormStore();
+  const { step, answers, consent, patient, toggleOption, next, prev } = useFormStore();
 
-  // Sem consentimento, volta pra Home (acesso direto por URL).
+  // Guarda o fluxo: sem consentimento → Home; sem dados do paciente → /dados.
   useEffect(() => {
     if (!consent) router.replace("/");
-  }, [consent, router]);
+    else if (!patient.nome.trim()) router.replace("/dados");
+  }, [consent, patient.nome, router]);
 
   const q = QUESTIONS[step];
   const selected = answers[q.id] ?? [];
