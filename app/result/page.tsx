@@ -8,7 +8,7 @@ import { useFormStore } from "@/store/useFormStore";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-type SendState = "idle" | "sending" | "sent" | "error";
+type SendState = "idle" | "sending" | "sent" | "fallback" | "error";
 
 // "José da Silva" -> "jose-da-silva" (para o nome do arquivo)
 function slugNome(nome: string): string {
@@ -58,7 +58,9 @@ export default function ResultPage() {
           }),
         });
         if (!res.ok) throw new Error(await res.text());
-        setSend("sent");
+        const data = await res.json().catch(() => ({}));
+        // via = "sivoe" quando gravou no prontuário; "email-fallback" quando caiu no e-mail.
+        setSend(data.via === "email-fallback" ? "fallback" : "sent");
       } catch (e) {
         console.error(e);
         setSend("error");
@@ -90,8 +92,11 @@ export default function ResultPage() {
         <div className="mt-6 h-5 text-center text-sm font-medium">
           {send === "sending" && <span className="text-mute">Registrando no prontuário…</span>}
           {send === "sent" && <span className="text-[#2d7a4f]">✓ Registrado no prontuário</span>}
+          {send === "fallback" && (
+            <span className="text-mute">✓ Enviado à recepção (o registro no prontuário será concluído manualmente).</span>
+          )}
           {send === "error" && (
-            <span className="text-mute">Resultado registrado. A recepção confirmará o registro, se necessário.</span>
+            <span className="text-mute">Não foi possível registrar automaticamente. A recepção fará o registro.</span>
           )}
         </div>
       </main>

@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFormStore } from "@/store/useFormStore";
 
@@ -12,6 +12,47 @@ function maskCpf(value: string) {
     .replace(/(\d{3})(\d)/, "$1.$2")
     .replace(/(\d{3})(\d)/, "$1.$2")
     .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+}
+
+// Valida CPF pelos dígitos verificadores (mesma regra que o Sivoe aplica).
+function cpfValido(value: string): boolean {
+  const c = value.replace(/\D/g, "");
+  if (c.length !== 11 || /^(\d)\1{10}$/.test(c)) return false;
+  const dv = (base: string, pesoInicial: number) => {
+    let soma = 0;
+    for (let i = 0; i < base.length; i++) soma += +base[i] * (pesoInicial - i);
+    const r = (soma * 10) % 11;
+    return r === 10 ? 0 : r;
+  };
+  return dv(c.slice(0, 9), 10) === +c[9] && dv(c.slice(0, 10), 11) === +c[10];
+}
+
+// Máscara de data no padrão brasileiro: dd/mm/aaaa.
+function maskData(value: string) {
+  const d = value.replace(/\D/g, "").slice(0, 8);
+  let out = d.slice(0, 2);
+  if (d.length > 2) out += "/" + d.slice(2, 4);
+  if (d.length > 4) out += "/" + d.slice(4, 8);
+  return out;
+}
+
+// "15/06/1981" (BR) -> "1981-06-15" (ISO). Retorna "" se incompleta/inválida.
+function brParaIso(br: string): string {
+  const m = br.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!m) return "";
+  const [, dd, mm, yyyy] = m;
+  const d = +dd, mo = +mm, y = +yyyy;
+  const dt = new Date(y, mo - 1, d);
+  // rejeita datas impossíveis (ex.: 31/02) que o Date "rola" para o mês seguinte
+  if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return "";
+  if (dt > new Date()) return "";
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+// "1981-06-15" (ISO) -> "15/06/1981" (BR), para inicializar o campo visível.
+function isoParaBr(iso: string): string {
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : "";
 }
 
 // Idade (anos completos) a partir da data de nascimento YYYY-MM-DD.
@@ -41,17 +82,30 @@ export default function Home() {
   const patient = useFormStore((s) => s.patient);
   const setPatient = useFormStore((s) => s.setPatient);
 
+  // Valor visível do campo de data no padrão BR (dd/mm/aaaa). O store guarda ISO.
+  const [nascBr, setNascBr] = useState(() => isoParaBr(patient.dataNascimento));
+
   // Toda vez que voltamos à Home, começamos do zero (kiosk).
   useEffect(() => {
     reset();
+    setNascBr("");
   }, [reset]);
+
+  function onDataChange(value: string) {
+    const br = maskData(value);
+    setNascBr(br);
+    const iso = brParaIso(br);
+    setPatient({ dataNascimento: iso, idade: idadeDe(iso) });
+  }
 
   const nome = patient.nome.trim();
   const dataNascimento = patient.dataNascimento.trim();
   const telefone = patient.telefone.trim();
   const cpf = patient.cpf.trim();
+  const cpfDigits = cpf.replace(/\D/g, "");
+  const cpfInvalido = cpfDigits.length === 11 && !cpfValido(cpf);
   const podeIniciar =
-    nome.length >= 2 && idadeDe(dataNascimento) !== "" && telefone.length >= 8 && cpf.length >= 11;
+    nome.length >= 2 && idadeDe(dataNascimento) !== "" && telefone.length >= 8 && cpfValido(cpf);
 
   function iniciar() {
     if (!podeIniciar) return;
@@ -92,17 +146,19 @@ export default function Home() {
                 placeholder="000.000.000-00"
                 className="input-triagem"
               />
+              {cpfInvalido && (
+                <span className="mt-1 block text-xs font-medium text-red-600">CPF inválido — confira os números.</span>
+              )}
             </Field>
 
             <Field label="Data de nascimento">
               <input
-                type="date"
-                value={patient.dataNascimento}
-                onChange={(e) =>
-                  setPatient({ dataNascimento: e.target.value, idade: idadeDe(e.target.value) })
-                }
+                type="text"
+                inputMode="numeric"
+                value={nascBr}
+                onChange={(e) => onDataChange(e.target.value)}
                 autoComplete="off"
-                max={new Date().toISOString().slice(0, 10)}
+                placeholder="dd/mm/aaaa"
                 className="input-triagem"
               />
             </Field>

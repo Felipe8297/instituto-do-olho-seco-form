@@ -90,7 +90,7 @@ export async function POST(req: Request) {
         pdfBase64: body.pdfBase64,
         filename: body.filename,
       });
-      return NextResponse.json({ ok: true, via: "email-fallback" });
+      return NextResponse.json({ ok: true, via: "email-fallback", motivo: String(sivoeErr) });
     } catch (emailErr) {
       console.error("[send-report] Fallback por e-mail também falhou:", emailErr);
       return NextResponse.json(
