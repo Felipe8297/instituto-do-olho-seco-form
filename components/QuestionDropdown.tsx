@@ -13,7 +13,9 @@ interface Props {
 export default function QuestionDropdown({ question, selected, onToggle }: Props) {
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="mb-1 text-base font-normal text-mute">Pode marcar mais de uma opção.</p>
+      {question.multi && (
+        <p className="mb-1 text-base font-normal text-mute">Pode marcar mais de uma opção.</p>
+      )}
       {question.options.map((opt) => {
         const active = selected.includes(opt.label);
         return (

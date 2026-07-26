@@ -104,8 +104,12 @@ export default function Home() {
   const cpf = patient.cpf.trim();
   const cpfDigits = cpf.replace(/\D/g, "");
   const cpfInvalido = cpfDigits.length === 11 && !cpfValido(cpf);
+  const telefoneDigits = telefone.replace(/\D/g, "");
+  // Telefone com DDD completo: 10 dígitos (fixo) ou 11 (celular).
+  const telefoneCompleto = telefoneDigits.length === 10 || telefoneDigits.length === 11;
+  const telefoneInvalido = telefoneDigits.length > 0 && !telefoneCompleto;
   const podeIniciar =
-    nome.length >= 2 && idadeDe(dataNascimento) !== "" && telefone.length >= 8 && cpfValido(cpf);
+    nome.length >= 2 && idadeDe(dataNascimento) !== "" && telefoneCompleto && cpfValido(cpf);
 
   function iniciar() {
     if (!podeIniciar) return;
@@ -174,6 +178,9 @@ export default function Home() {
               placeholder="(11) 90000-0000"
               className="input-triagem"
             />
+            {telefoneInvalido && (
+              <span className="mt-1 block text-xs font-medium text-red-600">Telefone incompleto — informe o DDD e o número completo.</span>
+            )}
           </Field>
         </div>
 

@@ -7,10 +7,7 @@ export default function ProgressBar({ current, total }: Props) {
   const pct = Math.round((current / total) * 100);
   return (
     <div className="w-full">
-      <div className="mb-1.5 flex items-baseline justify-between">
-        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber">
-          Pergunta {current} <span className="text-mute">de {total}</span>
-        </span>
+      <div className="mb-1.5 flex items-baseline justify-end">
         <span className="text-xs font-semibold text-mute">{pct}%</span>
       </div>
       <div
