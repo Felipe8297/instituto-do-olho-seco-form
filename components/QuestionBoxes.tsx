@@ -22,12 +22,12 @@ export default function QuestionBoxes({ question, selected, onToggle }: Props) {
             onClick={() => onToggle(opt.label)}
             className={`flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-lg border-2 p-4 text-center transition-all ${
               active
-                ? "border-amber bg-amber text-navy-deep shadow-soft"
-                : "border-line bg-card text-navy hover:border-amber"
+                ? "border-amber bg-amber text-graphite-deep shadow-soft"
+                : "border-line bg-card text-graphite hover:border-amber"
             }`}
           >
             <span
-              className={`font-display text-2xl font-semibold ${active ? "text-navy-deep" : "text-amber"}`}
+              className={`font-display text-2xl font-semibold ${active ? "text-graphite-deep" : "text-amber"}`}
             >
               {i}
             </span>

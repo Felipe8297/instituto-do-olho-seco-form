@@ -25,13 +25,13 @@ export default function QuestionDropdown({ question, selected, onToggle }: Props
             onClick={() => onToggle(opt.label)}
             className={`touch-target flex items-center gap-4 rounded-lg border-2 px-5 text-left text-lg font-medium transition-all ${
               active
-                ? "border-amber bg-amber/12 text-navy"
-                : "border-line bg-card text-navy hover:border-amber"
+                ? "border-amber bg-amber/12 text-graphite"
+                : "border-line bg-card text-graphite hover:border-amber"
             }`}
           >
             <span
               className={`grid h-8 w-8 shrink-0 place-items-center rounded-md border-2 transition-colors ${
-                active ? "border-amber bg-amber text-navy-deep" : "border-line bg-white"
+                active ? "border-amber bg-amber text-graphite-deep" : "border-line bg-white"
               }`}
             >
               {active && (

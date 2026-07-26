@@ -71,7 +71,7 @@ export default function Thermometer({ score, band, max = SCORE_MAX_ESCALA }: Pro
           <stop offset="100%" stopColor="#ef4444" />
         </linearGradient>
         <filter id="knobShadow" x="-60%" y="-60%" width="220%" height="220%">
-          <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#192938" floodOpacity="0.22" />
+          <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#3f3f46" floodOpacity="0.22" />
         </filter>
       </defs>
 
@@ -113,7 +113,7 @@ export default function Thermometer({ score, band, max = SCORE_MAX_ESCALA }: Pro
         y={182}
         textAnchor="middle"
         fontSize={74}
-        fill="#192938"
+        fill="#3f3f46"
         style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
       >
         {score}

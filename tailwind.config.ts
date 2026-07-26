@@ -9,10 +9,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Identidade do Instituto do Olho Seco (navy + dourado)
-        navy: "#192938",
-        "navy-deep": "#111d27",
-        "navy-mid": "#1e3347",
+        // Identidade do Instituto do Olho Seco (cinza + dourado)
+        graphite: "#3f3f46",
+        "graphite-deep": "#26262b",
+        "graphite-mid": "#52525b",
         amber: "#C9A66B",
         "amber-light": "#e0c08e",
         ink: "#1a1a2e", // texto principal

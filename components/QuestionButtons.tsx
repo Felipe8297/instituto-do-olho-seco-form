@@ -22,16 +22,16 @@ export default function QuestionButtons({ question, selected, onToggle }: Props)
             onClick={() => onToggle(opt.label)}
             className={`touch-target flex items-center gap-4 rounded-lg border-2 px-6 text-left text-lg font-medium transition-all sm:text-xl ${
               active
-                ? "border-amber bg-amber text-navy-deep shadow-soft"
-                : "border-line bg-card text-navy hover:border-amber"
+                ? "border-amber bg-amber text-graphite-deep shadow-soft"
+                : "border-line bg-card text-graphite hover:border-amber"
             }`}
           >
             <span
               className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 ${
-                active ? "border-navy-deep" : "border-line"
+                active ? "border-graphite-deep" : "border-line"
               }`}
             >
-              {active && <span className="h-3.5 w-3.5 rounded-full bg-navy-deep" />}
+              {active && <span className="h-3.5 w-3.5 rounded-full bg-graphite-deep" />}
             </span>
             {opt.label}
           </button>

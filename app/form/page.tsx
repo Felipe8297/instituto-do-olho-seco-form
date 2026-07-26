@@ -45,7 +45,7 @@ export default function FormPage() {
               {q.section}
             </p>
           )}
-          <h2 className="mb-7 font-sans text-2xl font-semibold leading-snug text-navy sm:text-3xl">
+          <h2 className="mb-7 font-sans text-2xl font-semibold leading-snug text-graphite sm:text-3xl">
             {q.text}
           </h2>
 
@@ -68,7 +68,7 @@ export default function FormPage() {
             type="button"
             onClick={prev}
             disabled={step === 0}
-            className="touch-target flex-1 rounded-lg border-2 border-navy bg-transparent px-6 text-lg font-semibold text-navy transition-colors enabled:hover:bg-navy/5 disabled:opacity-30"
+            className="touch-target flex-1 rounded-lg border-2 border-graphite bg-transparent px-6 text-lg font-semibold text-graphite transition-colors enabled:hover:bg-graphite/5 disabled:opacity-30"
           >
             Voltar
           </button>
@@ -76,7 +76,7 @@ export default function FormPage() {
             type="button"
             onClick={avancar}
             disabled={!answered}
-            className="touch-target flex-[2] rounded-lg bg-amber px-6 text-xl font-semibold text-navy-deep shadow-soft transition-all enabled:hover:bg-amber-light enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-line disabled:text-mute disabled:shadow-none"
+            className="touch-target flex-[2] rounded-lg bg-amber px-6 text-xl font-semibold text-graphite-deep shadow-soft transition-all enabled:hover:bg-amber-light enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-line disabled:text-mute disabled:shadow-none"
           >
             {isLast ? "Ver resultado" : "Avançar"}
           </button>

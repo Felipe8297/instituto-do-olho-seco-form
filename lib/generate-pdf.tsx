@@ -21,8 +21,8 @@ export interface ReportData {
   logoSrc?: string;
 }
 
-const NAVY = "#192938";
-const NAVY_DEEP = "#111d27";
+const GRAPHITE = "#3f3f46";
+const GRAPHITE_DEEP = "#26262b";
 const AMBER = "#C9A66B";
 const TEXT = "#1a1a2e";
 const MUTE = "#5a6478";
@@ -31,7 +31,7 @@ const LINE = "#dde3ed";
 const s = StyleSheet.create({
   page: { fontSize: 10, color: TEXT, fontFamily: "Helvetica" },
   headerBand: {
-    backgroundColor: NAVY,
+    backgroundColor: "#f2f3f5",
     paddingVertical: 18,
     paddingHorizontal: 34,
     borderBottomWidth: 3,
@@ -42,8 +42,8 @@ const s = StyleSheet.create({
   },
   logo: { height: 26, objectFit: "contain" },
   headerRight: { alignItems: "flex-end" },
-  headerTitle: { color: "#ffffff", fontSize: 11, fontFamily: "Helvetica-Bold" },
-  headerDate: { color: "rgba(255,255,255,0.6)", fontSize: 8, marginTop: 2 },
+  headerTitle: { color: GRAPHITE_DEEP, fontSize: 11, fontFamily: "Helvetica-Bold" },
+  headerDate: { color: MUTE, fontSize: 8, marginTop: 2 },
   body: { paddingHorizontal: 34, paddingTop: 20, paddingBottom: 40 },
   patientBox: {
     flexDirection: "row",
@@ -66,7 +66,7 @@ const s = StyleSheet.create({
     marginBottom: 8,
   },
   resultWrap: { flexDirection: "row", alignItems: "center", marginBottom: 24 },
-  scoreBig: { fontSize: 44, fontFamily: "Helvetica-Bold", color: NAVY },
+  scoreBig: { fontSize: 44, fontFamily: "Helvetica-Bold", color: GRAPHITE },
   bandLabel: { fontSize: 20, fontFamily: "Helvetica-Bold" },
   msg: { fontSize: 11, lineHeight: 1.5, marginTop: 8, color: TEXT },
   row: {
@@ -132,12 +132,12 @@ function ReportDoc({ answers, score, band, dateStr, patient, logoSrc }: ReportDa
   return (
     <Document>
       <Page size="A4" style={s.page}>
-        {/* Cabeçalho navy com a logo */}
+        {/* Cabeçalho claro com a logo */}
         <View style={s.headerBand} fixed>
           {logoSrc ? (
             <Image src={logoSrc} style={s.logo} />
           ) : (
-            <Text style={{ color: "#fff", fontFamily: "Helvetica-Bold", fontSize: 13 }}>
+            <Text style={{ color: GRAPHITE_DEEP, fontFamily: "Helvetica-Bold", fontSize: 13 }}>
               Instituto do Olho Seco
             </Text>
           )}
@@ -194,8 +194,8 @@ function ReportDoc({ answers, score, band, dateStr, patient, logoSrc }: ReportDa
           {/* Respostas depois (sem coluna de pontos) */}
           <Text style={s.eyebrow}>Respostas</Text>
           <View style={s.row}>
-            <Text style={[s.cQ, { fontFamily: "Helvetica-Bold", color: NAVY }]}>Pergunta</Text>
-            <Text style={[s.cA, { fontFamily: "Helvetica-Bold", color: NAVY }]}>Resposta(s)</Text>
+            <Text style={[s.cQ, { fontFamily: "Helvetica-Bold", color: GRAPHITE }]}>Pergunta</Text>
+            <Text style={[s.cA, { fontFamily: "Helvetica-Bold", color: GRAPHITE }]}>Resposta(s)</Text>
           </View>
           {QUESTIONS.map((q, i) => {
             const sel = answers[q.id] ?? [];

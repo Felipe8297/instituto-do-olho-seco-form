@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useFormStore } from "@/store/useFormStore";
 
@@ -28,7 +28,6 @@ export default function Home() {
   const setConsent = useFormStore((s) => s.setConsent);
   const patient = useFormStore((s) => s.patient);
   const setPatient = useFormStore((s) => s.setPatient);
-  const [agree, setAgree] = useState(false);
 
   // Toda vez que voltamos à Home, começamos do zero (kiosk).
   useEffect(() => {
@@ -39,8 +38,7 @@ export default function Home() {
   const idade = patient.idade.trim();
   const telefone = patient.telefone.trim();
   const cpf = patient.cpf.trim();
-  const dadosValidos = nome.length >= 2 && idade.length >= 1 && telefone.length >= 8 && cpf.length >= 11;
-  const podeIniciar = agree && dadosValidos;
+  const podeIniciar = nome.length >= 2 && idade.length >= 1 && telefone.length >= 8 && cpf.length >= 11;
 
   function iniciar() {
     if (!podeIniciar) return;
@@ -115,7 +113,7 @@ export default function Home() {
           type="button"
           onClick={iniciar}
           disabled={!podeIniciar}
-          className="mt-6 w-full touch-target rounded-lg bg-amber px-8 text-xl font-semibold text-navy-deep shadow-lg transition-all enabled:hover:bg-amber-light enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-line disabled:text-mute disabled:shadow-none"
+          className="mt-6 w-full touch-target rounded-lg bg-amber px-8 text-xl font-semibold text-graphite-deep shadow-lg transition-all enabled:hover:bg-amber-light enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-line disabled:text-mute disabled:shadow-none"
           style={{ minHeight: 72 }}
         >
           Iniciar check in consulta
@@ -132,7 +130,7 @@ export default function Home() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-semibold text-navy">{label}</span>
+      <span className="mb-1.5 block text-sm font-semibold text-graphite">{label}</span>
       {children}
     </label>
   );

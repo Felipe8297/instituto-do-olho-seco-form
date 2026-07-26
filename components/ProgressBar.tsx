@@ -9,12 +9,12 @@ export default function ProgressBar({ current, total }: Props) {
     <div className="w-full">
       <div className="mb-1.5 flex items-baseline justify-between">
         <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber">
-          Pergunta {current} <span className="text-white/45">de {total}</span>
+          Pergunta {current} <span className="text-mute">de {total}</span>
         </span>
-        <span className="text-xs font-semibold text-white/45">{pct}%</span>
+        <span className="text-xs font-semibold text-mute">{pct}%</span>
       </div>
       <div
-        className="h-2 w-full overflow-hidden rounded-full bg-white/15"
+        className="h-2 w-full overflow-hidden rounded-full bg-line"
         role="progressbar"
         aria-valuenow={current}
         aria-valuemin={1}
