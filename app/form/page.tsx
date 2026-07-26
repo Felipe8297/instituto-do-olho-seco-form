@@ -41,7 +41,7 @@ export default function FormPage() {
       <main className="flex-1 overflow-y-auto px-6 py-8">
         <div key={q.id} className="mx-auto max-w-2xl animate-fadeUp">
           {q.section && (
-            <p className="mb-3 font-sans text-2xl font-bold leading-tight text-amber sm:text-4xl">
+            <p className="mb-3 font-sans text-2xl font-bold leading-tight text-amber sm:text-2xl">
               {q.section}
             </p>
           )}
