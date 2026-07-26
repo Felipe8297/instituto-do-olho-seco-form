@@ -1,37 +1,42 @@
 import { NextResponse } from "next/server";
+import {
+  createPaciente,
+  createProntuario,
+  findPacienteByCpf,
+  onlyDigits,
+} from "@/lib/sivoe";
+import { esc, sendReportEmail } from "@/lib/report-email";
 
 export const runtime = "nodejs";
 
 interface Body {
-  to?: string;
   pdfBase64: string;
   filename: string;
   score: number;
   band: string;
-  patient?: { nome?: string; idade?: string; telefone?: string };
+  patient?: {
+    nome?: string;
+    idade?: string;
+    telefone?: string;
+    cpf?: string;
+    dataNascimento?: string; // YYYY-MM-DD
+  };
 }
 
-// Escapa texto do paciente antes de injetar no HTML do e-mail.
-function esc(v?: string) {
-  return (v ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+/** Resumo HTML da triagem gravado como mensagem do prontuário. */
+function mensagemProntuario(b: Body): string {
+  const p = b.patient ?? {};
+  return `<p><b>Triagem — Olho Seco (recepção)</b></p>
+          <table style="border-collapse:collapse;font-size:14px;margin:8px 0">
+            <tr><td style="padding:2px 12px 2px 0;color:#5a6478">Paciente</td><td><b>${esc(p.nome) || "—"}</b></td></tr>
+            <tr><td style="padding:2px 12px 2px 0;color:#5a6478">Idade</td><td>${esc(p.idade) || "—"}</td></tr>
+            <tr><td style="padding:2px 12px 2px 0;color:#5a6478">Telefone</td><td>${esc(p.telefone) || "—"}</td></tr>
+            <tr><td style="padding:2px 12px 2px 0;color:#5a6478">Score</td><td><b>${b.score}</b> — faixa <b>${esc(b.band)}</b></td></tr>
+          </table>
+          <p style="color:#5a6478;font-size:12px">Relatório completo em anexo (PDF). Registrado automaticamente pelo formulário de triagem.</p>`;
 }
 
 export async function POST(req: Request) {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM ?? "onboarding@resend.dev";
-  const defaultTo = process.env.REPORT_EMAIL ?? "felipe8297@gmail.com";
-
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "RESEND_API_KEY não configurada no servidor." },
-      { status: 500 }
-    );
-  }
-
   let body: Body;
   try {
     body = (await req.json()) as Body;
@@ -39,42 +44,63 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Corpo inválido." }, { status: 400 });
   }
 
-  const to = body.to || defaultTo;
   if (!body.pdfBase64 || !body.filename) {
     return NextResponse.json({ error: "PDF ausente." }, { status: 400 });
   }
 
   const p = body.patient ?? {};
-  const nome = esc(p.nome).trim();
-  const subject = nome
-    ? `Triagem Olho Seco — ${nome} — Score ${body.score} (${body.band})`
-    : `Triagem Olho Seco — Score ${body.score} (${body.band})`;
+  const cpf = onlyDigits(p.cpf);
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [to],
-      subject,
-      html: `<p>Relatório de triagem em anexo.</p>
-             <table style="border-collapse:collapse;font-size:14px;margin:8px 0">
-               <tr><td style="padding:2px 12px 2px 0;color:#5a6478">Paciente</td><td><b>${nome || "—"}</b></td></tr>
-               <tr><td style="padding:2px 12px 2px 0;color:#5a6478">Idade</td><td>${esc(p.idade) || "—"}</td></tr>
-               <tr><td style="padding:2px 12px 2px 0;color:#5a6478">Telefone</td><td>${esc(p.telefone) || "—"}</td></tr>
-               <tr><td style="padding:2px 12px 2px 0;color:#5a6478">Score</td><td><b>${body.score}</b> — faixa <b>${body.band}</b></td></tr>
-             </table>
-             <p style="color:#5a6478;font-size:12px">Enviado automaticamente pelo formulário de triagem da recepção.</p>`,
-      attachments: [{ filename: body.filename, content: body.pdfBase64 }],
-    }),
-  });
+  // --- Fluxo principal: gravar no prontuário do paciente no Sivoe ------------
+  try {
+    if (cpf.length !== 11) {
+      throw new Error("CPF ausente ou inválido — impossível localizar/criar paciente.");
+    }
+    if (!p.dataNascimento) {
+      throw new Error("Data de nascimento ausente — necessária para criar paciente.");
+    }
 
-  const text = await res.text();
-  if (!res.ok) {
-    return NextResponse.json({ error: "Falha no envio (Resend).", detail: text }, { status: 502 });
+    let pacienteId = await findPacienteByCpf(cpf);
+    if (!pacienteId) {
+      pacienteId = await createPaciente({
+        nome: (p.nome ?? "").trim(),
+        cpf,
+        dataNascimento: p.dataNascimento,
+        celular: p.telefone,
+      });
+    }
+
+    const { prontuario_id } = await createProntuario(pacienteId, {
+      mensagem: mensagemProntuario(body),
+      anexos: [
+        { nome: body.filename, base64: body.pdfBase64, mime_type: "application/pdf" },
+      ],
+    });
+
+    return NextResponse.json({ ok: true, via: "sivoe", pacienteId, prontuarioId: prontuario_id });
+  } catch (sivoeErr) {
+    console.error("[send-report] Falha no Sivoe, tentando fallback por e-mail:", sivoeErr);
+
+    // --- Fallback: enviar o relatório por e-mail (comportamento antigo) ------
+    try {
+      await sendReportEmail({
+        patient: p,
+        score: body.score,
+        band: body.band,
+        pdfBase64: body.pdfBase64,
+        filename: body.filename,
+      });
+      return NextResponse.json({ ok: true, via: "email-fallback" });
+    } catch (emailErr) {
+      console.error("[send-report] Fallback por e-mail também falhou:", emailErr);
+      return NextResponse.json(
+        {
+          error: "Falha ao registrar no prontuário e no e-mail.",
+          sivoe: String(sivoeErr),
+          email: String(emailErr),
+        },
+        { status: 502 }
+      );
+    }
   }
-  return NextResponse.json({ ok: true, detail: text });
 }

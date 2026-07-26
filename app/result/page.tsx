@@ -50,12 +50,11 @@ export default function ResultPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            to: process.env.NEXT_PUBLIC_REPORT_EMAIL || undefined,
             pdfBase64,
             filename: `triagem-olho-seco-${slugNome(patient.nome)}.pdf`,
             score,
             band: band.label,
-            patient,
+            patient, // inclui nome, cpf, idade, telefone e dataNascimento
           }),
         });
         if (!res.ok) throw new Error(await res.text());
@@ -89,10 +88,10 @@ export default function ResultPage() {
         
         {/* Status discreto do envio */}
         <div className="mt-6 h-5 text-center text-sm font-medium">
-          {send === "sending" && <span className="text-mute">Enviando resumo…</span>}
-          {send === "sent" && <span className="text-[#2d7a4f]">✓ Resumo enviado</span>}
+          {send === "sending" && <span className="text-mute">Registrando no prontuário…</span>}
+          {send === "sent" && <span className="text-[#2d7a4f]">✓ Registrado no prontuário</span>}
           {send === "error" && (
-            <span className="text-mute">Resumo registrado. A recepção fará o envio, se necessário.</span>
+            <span className="text-mute">Resultado registrado. A recepção confirmará o registro, se necessário.</span>
           )}
         </div>
       </main>

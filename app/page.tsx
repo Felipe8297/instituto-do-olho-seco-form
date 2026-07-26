@@ -14,6 +14,18 @@ function maskCpf(value: string) {
     .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
 
+// Idade (anos completos) a partir da data de nascimento YYYY-MM-DD.
+function idadeDe(dataNascimento: string): string {
+  if (!dataNascimento) return "";
+  const dob = new Date(dataNascimento + "T00:00:00");
+  if (isNaN(dob.getTime())) return "";
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - dob.getFullYear();
+  const m = hoje.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && hoje.getDate() < dob.getDate())) idade--;
+  return idade >= 0 && idade <= 120 ? String(idade) : "";
+}
+
 function maskTelefone(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 11);
   if (digits.length <= 10) {
@@ -35,10 +47,11 @@ export default function Home() {
   }, [reset]);
 
   const nome = patient.nome.trim();
-  const idade = patient.idade.trim();
+  const dataNascimento = patient.dataNascimento.trim();
   const telefone = patient.telefone.trim();
   const cpf = patient.cpf.trim();
-  const podeIniciar = nome.length >= 2 && idade.length >= 1 && telefone.length >= 8 && cpf.length >= 11;
+  const podeIniciar =
+    nome.length >= 2 && idadeDe(dataNascimento) !== "" && telefone.length >= 8 && cpf.length >= 11;
 
   function iniciar() {
     if (!podeIniciar) return;
@@ -81,16 +94,15 @@ export default function Home() {
               />
             </Field>
 
-            <Field label="Idade">
+            <Field label="Data de nascimento">
               <input
-                type="number"
-                inputMode="numeric"
-                value={patient.idade}
-                onChange={(e) => setPatient({ idade: e.target.value })}
+                type="date"
+                value={patient.dataNascimento}
+                onChange={(e) =>
+                  setPatient({ dataNascimento: e.target.value, idade: idadeDe(e.target.value) })
+                }
                 autoComplete="off"
-                placeholder="Ex: 62"
-                min={0}
-                max={120}
+                max={new Date().toISOString().slice(0, 10)}
                 className="input-triagem"
               />
             </Field>
