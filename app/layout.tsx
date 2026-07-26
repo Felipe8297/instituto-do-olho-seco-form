@@ -17,8 +17,8 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Triagem de Olho Seco — Instituto do Olho Seco",
-  description: "Formulário de triagem de olho seco para atendimento na recepção.",
+  title: "Check In Consulta",
+  description: "Formulário de Check In Consulta para atendimento na recepção.",
 };
 
 export const viewport: Viewport = {

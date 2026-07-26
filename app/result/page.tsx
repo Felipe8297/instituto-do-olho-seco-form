@@ -54,6 +54,7 @@ export default function ResultPage() {
             filename: `triagem-olho-seco-${slugNome(patient.nome)}.pdf`,
             score,
             band: band.label,
+            answers, // respostas por pergunta, para consolidar na planilha
             patient, // inclui nome, cpf, idade, telefone e dataNascimento
           }),
         });

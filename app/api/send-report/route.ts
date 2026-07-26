@@ -6,6 +6,8 @@ import {
   onlyDigits,
 } from "@/lib/sivoe";
 import { esc, sendReportEmail } from "@/lib/report-email";
+import { appendRow } from "@/lib/google-sheets";
+import { QUESTIONS } from "@/lib/form-config";
 
 export const runtime = "nodejs";
 
@@ -14,6 +16,7 @@ interface Body {
   filename: string;
   score: number;
   band: string;
+  answers?: Record<string, string[]>;
   patient?: {
     nome?: string;
     idade?: string;
@@ -21,6 +24,37 @@ interface Body {
     cpf?: string;
     dataNascimento?: string; // YYYY-MM-DD
   };
+}
+
+// Cabeçalho fixo + uma coluna por pergunta (rótulo = texto da pergunta).
+const SHEET_HEADER = [
+  "Data/Hora",
+  "Nome",
+  "CPF",
+  "Idade",
+  "Telefone",
+  "Nascimento",
+  "Score",
+  "Faixa",
+  ...QUESTIONS.map((q, i) => `${i + 1}. ${q.text}`),
+];
+
+/** Grava a triagem numa nova linha da planilha do Google (best-effort). */
+async function registrarNaPlanilha(b: Body) {
+  const p = b.patient ?? {};
+  const answers = b.answers ?? {};
+  const row: (string | number)[] = [
+    new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+    p.nome ?? "",
+    p.cpf ?? "",
+    p.idade ?? "",
+    p.telefone ?? "",
+    p.dataNascimento ?? "",
+    b.score,
+    b.band,
+    ...QUESTIONS.map((q) => (answers[q.id] ?? []).join(", ")),
+  ];
+  await appendRow(row, SHEET_HEADER);
 }
 
 /** Resumo HTML da triagem gravado como mensagem do prontuário. */
@@ -50,6 +84,11 @@ export async function POST(req: Request) {
 
   const p = body.patient ?? {};
   const cpf = onlyDigits(p.cpf);
+
+  // --- Consolidação na planilha do Google (best-effort, não bloqueia) --------
+  await registrarNaPlanilha(body).catch((err) =>
+    console.error("[send-report] Falha ao gravar na planilha do Google:", err)
+  );
 
   // --- Fluxo principal: gravar no prontuário do paciente no Sivoe ------------
   try {

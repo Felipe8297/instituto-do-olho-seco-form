@@ -47,14 +47,14 @@ const s = StyleSheet.create({
   body: { paddingHorizontal: 34, paddingTop: 20, paddingBottom: 40 },
   patientBox: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 4,
+    flexWrap: "nowrap",
+    gap: 8,
     backgroundColor: "#f7f8fa",
     borderRadius: 8,
     padding: 12,
     marginBottom: 22,
   },
-  patientItem: { width: "50%", marginBottom: 4 },
+  patientItem: { flex: 1, paddingRight: 4 },
   patientLabel: { fontSize: 8, color: MUTE, textTransform: "uppercase", letterSpacing: 0.5 },
   patientValue: { fontSize: 12, color: TEXT, fontFamily: "Helvetica-Bold" },
   eyebrow: {
@@ -142,7 +142,7 @@ function ReportDoc({ answers, score, band, dateStr, patient, logoSrc }: ReportDa
             </Text>
           )}
           <View style={s.headerRight}>
-            <Text style={s.headerTitle}>Relatório de Triagem — Olho Seco</Text>
+            <Text style={s.headerTitle}>Check In Consulta</Text>
             <Text style={s.headerDate}>{dateStr}</Text>
           </View>
         </View>
