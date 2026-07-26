@@ -6,6 +6,7 @@ export interface Patient {
   nome: string;
   idade: string;
   telefone: string;
+  cpf: string;
 }
 
 interface FormState {
@@ -26,7 +27,7 @@ interface FormState {
 }
 
 const OPT_NAO = "Não";
-const EMPTY_PATIENT: Patient = { nome: "", idade: "", telefone: "" };
+const EMPTY_PATIENT: Patient = { nome: "", idade: "", telefone: "", cpf: "" };
 
 export const useFormStore = create<FormState>((set, get) => ({
   answers: {},

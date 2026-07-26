@@ -14,10 +14,9 @@ export default function FormPage() {
   const router = useRouter();
   const { step, answers, consent, patient, toggleOption, next, prev } = useFormStore();
 
-  // Guarda o fluxo: sem consentimento → Home; sem dados do paciente → /dados.
+  // Guarda o fluxo: sem consentimento ou sem dados do paciente → Home.
   useEffect(() => {
-    if (!consent) router.replace("/");
-    else if (!patient.nome.trim()) router.replace("/dados");
+    if (!consent || !patient.nome.trim()) router.replace("/");
   }, [consent, patient.nome, router]);
 
   const q = QUESTIONS[step];

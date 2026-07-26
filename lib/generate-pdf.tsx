@@ -17,7 +17,7 @@ export interface ReportData {
   score: number;
   band: ScoreBand;
   dateStr: string;
-  patient?: { nome: string; idade: string; telefone: string };
+  patient?: { nome: string; idade: string; telefone: string; cpf: string };
   logoSrc?: string;
 }
 
@@ -149,13 +149,17 @@ function ReportDoc({ answers, score, band, dateStr, patient, logoSrc }: ReportDa
 
         <View style={s.body}>
           {/* Dados do paciente */}
-          {patient && (patient.nome || patient.idade || patient.telefone) ? (
+          {patient && (patient.nome || patient.idade || patient.telefone || patient.cpf) ? (
             <>
               <Text style={s.eyebrow}>Paciente</Text>
               <View style={s.patientBox}>
                 <View style={s.patientItem}>
                   <Text style={s.patientLabel}>Nome</Text>
                   <Text style={s.patientValue}>{patient.nome || "—"}</Text>
+                </View>
+                <View style={s.patientItem}>
+                  <Text style={s.patientLabel}>CPF</Text>
+                  <Text style={s.patientValue}>{patient.cpf || "—"}</Text>
                 </View>
                 <View style={s.patientItem}>
                   <Text style={s.patientLabel}>Idade</Text>

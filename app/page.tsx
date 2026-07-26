@@ -4,12 +4,30 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFormStore } from "@/store/useFormStore";
-import { QUESTIONS } from "@/lib/form-config";
+
+function maskCpf(value: string) {
+  return value
+    .replace(/\D/g, "")
+    .slice(0, 11)
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+}
+
+function maskTelefone(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 10) {
+    return digits.replace(/(\d{2})(\d{4})(\d{0,4})/, (_, a, b, c) => (c ? `(${a}) ${b}-${c}` : b ? `(${a}) ${b}` : `(${a}`));
+  }
+  return digits.replace(/(\d{2})(\d{5})(\d{0,4})/, (_, a, b, c) => (c ? `(${a}) ${b}-${c}` : `(${a}) ${b}`));
+}
 
 export default function Home() {
   const router = useRouter();
   const reset = useFormStore((s) => s.reset);
   const setConsent = useFormStore((s) => s.setConsent);
+  const patient = useFormStore((s) => s.patient);
+  const setPatient = useFormStore((s) => s.setPatient);
   const [agree, setAgree] = useState(false);
 
   // Toda vez que voltamos à Home, começamos do zero (kiosk).
@@ -17,74 +35,105 @@ export default function Home() {
     reset();
   }, [reset]);
 
+  const nome = patient.nome.trim();
+  const idade = patient.idade.trim();
+  const telefone = patient.telefone.trim();
+  const cpf = patient.cpf.trim();
+  const dadosValidos = nome.length >= 2 && idade.length >= 1 && telefone.length >= 8 && cpf.length >= 11;
+  const podeIniciar = agree && dadosValidos;
+
   function iniciar() {
-    if (!agree) return;
+    if (!podeIniciar) return;
     setConsent(true);
-    router.push("/dados");
+    router.push("/form");
   }
 
   return (
-    <main className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-navy px-6 py-12 text-center">
-      {/* brilho dourado sutil ao fundo */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(60% 45% at 50% 0%, rgba(201,166,107,0.16) 0%, rgba(25,41,56,0) 70%)",
-        }}
-      />
-
-      <div className="relative z-10 flex w-full max-w-2xl flex-col items-center">
+    <main className="flex min-h-dvh flex-col items-center overflow-y-auto bg-off-white px-6 py-10 text-center">
+      <div className="flex w-full max-w-xl flex-col items-center">
         <img
           src="/logo.png"
           alt="Instituto do Olho Seco"
-          className="h-16 w-auto animate-fadeUp sm:h-20"
+          className="h-14 w-auto animate-fadeUp sm:h-16"
         />
 
-        <p className="mt-10 animate-fadeUp text-xs font-semibold uppercase tracking-[0.3em] text-amber">
-          Triagem de olho seco
-        </p>
+        <div className="mt-7 flex w-full animate-fadeUp flex-col gap-4 rounded-xl border border-line bg-card p-5 text-left shadow-soft">
+          <Field label="Nome completo">
+            <input
+              type="text"
+              value={patient.nome}
+              onChange={(e) => setPatient({ nome: e.target.value })}
+              autoComplete="off"
+              autoCapitalize="words"
+              placeholder="Digite seu nome"
+              className="input-triagem"
+            />
+          </Field>
 
-        <h1 className="mt-4 animate-fadeUp font-display text-4xl font-light leading-[1.1] text-white sm:text-5xl">
-          Como andam
-          <br />
-          seus olhos hoje?
-        </h1>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="CPF">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={patient.cpf}
+                onChange={(e) => setPatient({ cpf: maskCpf(e.target.value) })}
+                autoComplete="off"
+                placeholder="000.000.000-00"
+                className="input-triagem"
+              />
+            </Field>
 
-        <p className="mt-5 max-w-lg animate-fadeUp text-lg font-light leading-relaxed text-white/70 sm:text-xl">
-          São {QUESTIONS.length} perguntas rápidas. Leva menos de 5 minutos e ajuda o seu médico a
-          cuidar melhor de você.
-        </p>
+            <Field label="Idade">
+              <input
+                type="number"
+                inputMode="numeric"
+                value={patient.idade}
+                onChange={(e) => setPatient({ idade: e.target.value })}
+                autoComplete="off"
+                placeholder="Ex: 62"
+                min={0}
+                max={120}
+                className="input-triagem"
+              />
+            </Field>
+          </div>
 
-        {/* Consentimento LGPD (dado de saúde) */}
-        <label className="mt-9 flex max-w-lg cursor-pointer items-start gap-3 rounded-lg border border-white/15 bg-white/5 p-4 text-left">
-          <input
-            type="checkbox"
-            checked={agree}
-            onChange={(e) => setAgree(e.target.checked)}
-            className="mt-0.5 h-6 w-6 shrink-0 accent-amber"
-          />
-          <span className="text-base font-light leading-snug text-white/85">
-            Autorizo o uso das minhas respostas para esta triagem e o envio do resumo por e-mail à
-            equipe do Instituto, conforme a LGPD.
-          </span>
-        </label>
+          <Field label="Telefone com DDD">
+            <input
+              type="tel"
+              inputMode="tel"
+              value={patient.telefone}
+              onChange={(e) => setPatient({ telefone: maskTelefone(e.target.value) })}
+              autoComplete="off"
+              placeholder="(11) 90000-0000"
+              className="input-triagem"
+            />
+          </Field>
+        </div>
 
         <button
           type="button"
           onClick={iniciar}
-          disabled={!agree}
-          className="mt-8 w-full max-w-md touch-target rounded-lg bg-amber px-8 text-xl font-semibold text-navy-deep shadow-lg transition-all enabled:hover:bg-amber-light enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/40 disabled:shadow-none"
+          disabled={!podeIniciar}
+          className="mt-6 w-full touch-target rounded-lg bg-amber px-8 text-xl font-semibold text-navy-deep shadow-lg transition-all enabled:hover:bg-amber-light enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-line disabled:text-mute disabled:shadow-none"
           style={{ minHeight: 72 }}
         >
-          Iniciar triagem
+          Iniciar check in consulta
         </button>
 
-        <p className="mt-6 max-w-md text-sm font-light text-white/45">
+        <p className="mb-2 mt-5 max-w-md text-sm font-light text-mute">
           Esta triagem não substitui uma avaliação médica.
         </p>
       </div>
     </main>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-sm font-semibold text-navy">{label}</span>
+      {children}
+    </label>
   );
 }
