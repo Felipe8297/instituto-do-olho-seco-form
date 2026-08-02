@@ -24,7 +24,7 @@ export function esc(v?: string) {
 export async function sendReportEmail(input: ReportEmailInput): Promise<string> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM ?? "onboarding@resend.dev";
-  const to = input.to || process.env.REPORT_EMAIL || "institutodoolhoseco@gmail.com";
+  const to = input.to || process.env.REPORT_EMAIL || "checkinvizon@gmail.com";
 
   if (!apiKey) throw new Error("RESEND_API_KEY não configurada no servidor.");
   if (!input.pdfBase64 || !input.filename) throw new Error("PDF ausente.");
