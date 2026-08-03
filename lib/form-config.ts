@@ -320,31 +320,31 @@ export interface ScoreBand {
 export const SCORE_BANDS: ScoreBand[] = [
   {
     min: 0,
-    max: 20,
+    max: 19,
     label: "Normal",
     color: "#22c55e",
     msg: "De acordo com suas respostas, você não apresenta sintomas anormais.",
   },
   {
     min: 20,
-    max: 40,
+    max: 39,
     label: "Leve",
     color: "#eab308",
-    msg: "De acordo com suas respostas, você apresenta sintomas anormais, sugerimos informar ao seu médico sobre essa condição e como tratá-la.",
+    msg: "De acordo com suas respostas, você apresenta leves sintomas de desconforto ocular, sugerimos informar ao seu médico sobre essa condição e como tratá-la.",
   },
   {
     min: 40,
-    max: 60,
+    max: 59,
     label: "Moderado",
     color: "#f97316",
-    msg: "De acordo com suas respostas, você apresenta sintomas anormais, relacionados a doença de olho seco. Sugerimos informar ao seu médico sobre essa condição e como tratá-la.",
+    msg: "De acordo com suas respostas, você apresenta sintomas anormais de desconforto ocular, relacionados a doença de olho seco. Sugerimos informar ao seu médico sobre essa condição e como tratá-la.",
   },
   {
     min: 60,
     max: 9999,
     label: "Grave",
     color: "#ef4444",
-    msg: "De acordo com suas respostas, você apresenta sintomas anormais, relacionados a uma doença grave de olho seco. Sugerimos informar ao seu médico sobre essa condição e como tratá-la.",
+    msg: "De acordo com suas respostas, você apresenta sintomas anormais e graves, relacionados a doença  de olho seco. Sugerimos informar ao seu médico sobre essa condição e como tratá-la. ",
   },
 ];
 
